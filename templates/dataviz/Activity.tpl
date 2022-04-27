@@ -19,8 +19,7 @@
 
 
 <script>
-var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS count FROM civicrm_activity WHERE activity_type_id IN (56 ) group by DATE(activity_date_time)"};
-var cancelData = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS count FROM civicrm_activity WHERE activity_type_id IN (60 ) group by DATE(activity_date_time)"};
+var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS count, 0 as count_cancel FROM civicrm_activity WHERE activity_type_id IN (56) group by DATE(activity_date_time) union SELECT DATE(activity_date_time) AS date, 0 as count, count(*) AS count_cancel FROM civicrm_activity WHERE activity_type_id IN (60 ) group by DATE(activity_date_time)"};
 //var data = {crmSQL file="activities"};
 {literal}
 (function() { function bootViz() {
@@ -48,15 +47,14 @@ var cancelData = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) 
     .group(all);
   document.getElementById("total-count").innerHTML=totalSignups;
 
-
   monthLine=null;
   monthLine 	= dc.lineChart('#signups-by-month');
 
-
-
-
   var creationMonth = ndx.dimension(function(d) {  return d.dd; });
   var creationMonthGroup = creationMonth.group().reduceSum(function(d) { return d.count; });
+
+  var cancelMonth = ndx.dimension(function(d) {  return d.dd; });
+  var cancelMonthGroup = cancelMonth.group().reduceSum(function(d) { return d.count_cancel; });
 
   var min = d3.timeDay.offset(d3.min(data.values, function(d) { return d.dd;} ),-2);
   var max = d3.timeDay.offset(d3.max(data.values, function(d) { return d.dd;} ), 2);
@@ -73,32 +71,8 @@ var cancelData = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) 
         .xUnits(d3.timeDays);
 
   // cancels
-    var totalCancels = 0;
-    cancelData.values.forEach(function(d){
-        totalCancels+=d.count;
-        totalContacts+=d.count;
-        d.dd = dateFormat(d.date);
-    });
-
-    ndx  = crossfilter(cancelData.values);
-    all = ndx.groupAll();
-
-
-    totalCount = dc.dataCount("#datacount")
-        .dimension(ndx)
-        .group(all);
-
-
     cancelLine=null;
     cancelLine 	= dc.lineChart('#cancels-by-month');
-
-
-
-    var cancelMonth = ndx.dimension(function(d) {  return d.dd; });
-    var cancelMonthGroup = cancelMonth.group().reduceSum(function(d) { return d.count; });
-
-    min = d3.timeDay.offset(d3.min(cancelData.values, function(d) { return d.dd;} ),-2);
-    max = d3.timeDay.offset(d3.max(cancelData.values, function(d) { return d.dd;} ), 2);
 
     cancelLine
         .width(800)
