@@ -15,6 +15,12 @@
     <div class="clearfix"></div>
   </div>
 
+  <div id="signup-bar-by-month">
+    <strong>Date - Contract Created by Month Bar-Chart</strong>
+    <a class="reset civisualize-reset" href data-chart-name="signupBarMonth" >reset</a>
+    <div class="clearfix"></div>
+  </div>
+
   <div class="clear"></div>
 
 
@@ -47,8 +53,6 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
     .group(all);
   document.getElementById("total-count").innerHTML=totalSignups;
 
-  monthLine=null;
-  monthLine 	= dc.lineChart('#signups-by-month');
 
   var creationMonth = ndx.dimension(function(d) {  return d.dd; });
   var creationMonthGroup = creationMonth.group().reduceSum(function(d) { return d.count; });
@@ -58,6 +62,10 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
 
   var min = d3.timeDay.offset(d3.min(data.values, function(d) { return d.dd;} ),-2);
   var max = d3.timeDay.offset(d3.max(data.values, function(d) { return d.dd;} ), 2);
+
+  // Signup Linechart
+  monthLine=null;
+  monthLine 	= dc.lineChart('#signups-by-month');
 
   monthLine
         .width(800)
@@ -70,7 +78,7 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
         .elasticY(true)
         .xUnits(d3.timeDays);
 
-  // cancels
+  // Canceled LineChart
     cancelLine=null;
     cancelLine 	= dc.lineChart('#cancels-by-month');
 
@@ -85,12 +93,30 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
         .elasticY(true)
         .xUnits(d3.timeDays);
 
+  // Signup by Month Barchart
+  var byMonth     = ndx.dimension(function(d) { return d3.timeMonth(d.dd); });
+  var volumeByMonthGroup  = byMonth.group().reduceSum(function(d) { return d.count; });
+
+  signupBar = null;
+  signupBar 	= dc.barChart('#signup-bar-by-month');
+  signupBar
+        .width(800)
+        .height(200)
+        .margins({top: 10, right: 50, bottom: 30, left: 50})
+        .dimension(byMonth)
+        .group(volumeByMonthGroup)
+        .x(d3.scaleTime().domain([min, max]))
+        .round(d3.timeMonth.round)
+        .xUnits(d3.timeMonths);
+
+
   dc.renderAll();
 
   //CRM.civisualize.charts['exampleTypePie'] = typePie;
   //CRM.civisualize.charts['exampleGenderPie'] = genderPie;
   CRM.civisualize.charts['contactsMonthLine'] = monthLine;
   CRM.civisualize.charts['cancelMonthLine'] = cancelLine;
+  CRM.civisualize.charts['signupBarMonth'] = signupBar;
   CRM.civisualize.bindResetLinks();
 
   }
