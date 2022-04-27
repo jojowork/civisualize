@@ -21,6 +21,12 @@
     <div class="clearfix"></div>
   </div>
 
+  <div id="signup-bar-by-year">
+    <strong>Date - Contract Created by Year Bar-Chart</strong>
+    <a class="reset civisualize-reset" href data-chart-name="signupBarYear" >reset</a>
+    <div class="clearfix"></div>
+  </div>
+
   <div class="clear"></div>
 
 
@@ -110,6 +116,22 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
         .xUnits(d3.timeMonths);
 
 
+  // Signup by Year Barchart
+  var byYear     = ndx.dimension(function(d) { return d3.timeYear(d.dd); });
+  var volumeByMonthGroup  = byYear.group().reduceSum(function(d) { return d.count; });
+
+  yearSignupBar = null;
+  yearSignupBar 	= dc.barChart('#signup-bar-by-month');
+  yearSignupBar
+          .width(800)
+          .height(200)
+          .margins({top: 10, right: 50, bottom: 30, left: 50})
+          .dimension(byYear)
+          .group(volumeByMonthGroup)
+          .x(d3.scaleTime().domain([min, max]))
+          .round(d3.timeYear.round)
+          .xUnits(d3.timeYears);
+
   dc.renderAll();
 
   //CRM.civisualize.charts['exampleTypePie'] = typePie;
@@ -117,6 +139,7 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
   CRM.civisualize.charts['contactsMonthLine'] = monthLine;
   CRM.civisualize.charts['cancelMonthLine'] = cancelLine;
   CRM.civisualize.charts['signupBarMonth'] = signupBar;
+  CRM.civisualize.charts['signupBarYear'] = yearSignupBar;
   CRM.civisualize.bindResetLinks();
 
   }
