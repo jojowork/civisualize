@@ -31,7 +31,7 @@
 
 
 <script>
-var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS count, 0 as count_cancel FROM civicrm_activity WHERE activity_type_id IN (56) group by DATE(activity_date_time) union SELECT DATE(activity_date_time) AS date, 0 as count, count(*) AS count_cancel FROM civicrm_activity WHERE activity_type_id IN (60 ) group by DATE(activity_date_time)"};
+var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS count, 0 as count_cancel FROM civicrm_activity WHERE activity_type_id IN (56) group by DATE(activity_date_time) union SELECT DATE(activity_date_time) AS date, 0 as count, -count(*) AS count_cancel FROM civicrm_activity WHERE activity_type_id IN (60 ) group by DATE(activity_date_time)"};
 //var data = {crmSQL file="activities"};
 {literal}
 (function() { function bootViz() {
@@ -82,7 +82,8 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
         .x(d3.scaleTime().domain([min, max]))
         .round(d3.timeDay.round)
         .elasticY(true)
-        .xUnits(d3.timeDays);
+        .xUnits(d3.timeDays)
+        .colors("#00aa00");
 
   // Canceled LineChart
     cancelLine=null;
@@ -97,7 +98,8 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
         .x(d3.scaleTime().domain([min, max]))
         .round(d3.timeDay.round)
         .elasticY(true)
-        .xUnits(d3.timeDays);
+        .xUnits(d3.timeDays)
+        .colors("#cc0000");
 
   // Signup by Month Barchart
   var byMonth     = ndx.dimension(function(d) { return d3.timeMonth(d.dd); });
@@ -113,7 +115,8 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
         .group(volumeByMonthGroup)
         .x(d3.scaleTime().domain([min, max]))
         .round(d3.timeMonth.round)
-        .xUnits(d3.timeMonths);
+        .xUnits(d3.timeMonths)
+        .colors("#00aa00");
 
 
   // Signup by Year Barchart
@@ -121,7 +124,7 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
   var volumeByMonthGroup  = byYear.group().reduceSum(function(d) { return d.count; });
 
   yearSignupBar = null;
-  yearSignupBar 	= dc.barChart('#signup-bar-by-month');
+  yearSignupBar 	= dc.barChart('#signup-bar-by-year');
   yearSignupBar
           .width(800)
           .height(200)
@@ -130,7 +133,8 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
           .group(volumeByMonthGroup)
           .x(d3.scaleTime().domain([min, max]))
           .round(d3.timeYear.round)
-          .xUnits(d3.timeYears);
+          .xUnits(d3.timeYears)
+          .colors("#00aa00");
 
   dc.renderAll();
 
