@@ -4,6 +4,17 @@
 	    <br>
 	</div>
   <div class="clear"></div>
+  <div id="signup-bar-by-year">
+    <strong>Date - Contract Created by Year Bar-Chart</strong>
+    <a class="reset civisualize-reset" href data-chart-name="signupBarYear" >reset</a>
+    <div class="clearfix"></div>
+  </div>
+
+  <div id="signup-bar-by-month">
+    <strong>Date - Contract Created by Month Bar-Chart</strong>
+    <a class="reset civisualize-reset" href data-chart-name="signupBarMonth" >reset</a>
+    <div class="clearfix"></div>
+  </div>
   <div id="signups-by-month">
       <strong>Date - Contract Created</strong>
       <a class="reset civisualize-reset" href data-chart-name="contactsMonthLine" >reset</a>
@@ -15,23 +26,18 @@
     <div class="clearfix"></div>
   </div>
 
-  <div id="signup-bar-by-month">
-    <strong>Date - Contract Created by Month Bar-Chart</strong>
-    <a class="reset civisualize-reset" href data-chart-name="signupBarMonth" >reset</a>
-    <div class="clearfix"></div>
-  </div>
 
-  <div id="signup-bar-by-year">
-    <strong>Date - Contract Created by Year Bar-Chart</strong>
-    <a class="reset civisualize-reset" href data-chart-name="signupBarYear" >reset</a>
-    <div class="clearfix"></div>
-  </div>
+<div id="contract-series-chart">
+  <strong>Date - Contract Series Chart</strong>
+  <a class="reset civisualize-reset" href data-chart-name="contractSeriesChart" >reset</a>
+  <div class="clearfix"></div>
+</div>
 
   <div class="clear"></div>
 
 
 <script>
-var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS count, 0 as count_cancel FROM civicrm_activity WHERE activity_type_id IN (56) group by DATE(activity_date_time) union SELECT DATE(activity_date_time) AS date, 0 as count, -count(*) AS count_cancel FROM civicrm_activity WHERE activity_type_id IN (60 ) group by DATE(activity_date_time)"};
+var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS count, 0 as count_cancel,'signup' AS activity FROM civicrm_activity WHERE activity_type_id IN (56) group by DATE(activity_date_time) union SELECT DATE(activity_date_time) AS date, 0 as count, -count(*) AS count_cancel,'cancel' AS activity FROM civicrm_activity WHERE activity_type_id IN (60 ) group by DATE(activity_date_time)"};
 //var data = {crmSQL file="activities"};
 {literal}
 (function() { function bootViz() {
@@ -69,62 +75,32 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
   var min = d3.timeDay.offset(d3.min(data.values, function(d) { return d.dd;} ),-2);
   var max = d3.timeDay.offset(d3.max(data.values, function(d) { return d.dd;} ), 2);
 
-  // Signup Linechart
+  var minY = d3.min(data.values, function(d){ return d.count_cancel; });
+  var maxY = d3.max(data.values, function(d){ return d.count; });
+  var y = d3.scaleLinear().domain([minY, maxY]).range([minY, maxY]);
+
+  var x = d3.scaleTime().domain([min, max])
+
+
+  // instantiate Charts
   monthLine=null;
   monthLine 	= dc.lineChart('#signups-by-month');
 
-  monthLine
-        .width(800)
-        .height(200)
-        .margins({top: 10, right: 50, bottom: 30, left: 50})
-        .dimension(creationMonth)
-        .group(creationMonthGroup)
-        .x(d3.scaleTime().domain([min, max]))
-        .round(d3.timeDay.round)
-        .elasticY(true)
-        .xUnits(d3.timeDays)
-        .colors("#00aa00");
+  cancelLine=null;
+  cancelLine 	= dc.lineChart('#cancels-by-month');
 
-  // Canceled LineChart
-    cancelLine=null;
-    cancelLine 	= dc.lineChart('#cancels-by-month');
-
-    cancelLine
-        .width(800)
-        .height(200)
-        .margins({top: 10, right: 50, bottom: 30, left: 50})
-        .dimension(cancelMonth)
-        .group(cancelMonthGroup)
-        .x(d3.scaleTime().domain([min, max]))
-        .round(d3.timeDay.round)
-        .elasticY(true)
-        .xUnits(d3.timeDays)
-        .colors("#cc0000");
-
-  // Signup by Month Barchart
   var byMonth     = ndx.dimension(function(d) { return d3.timeMonth(d.dd); });
   var volumeByMonthGroup  = byMonth.group().reduceSum(function(d) { return d.count; });
-
   signupBar = null;
   signupBar 	= dc.barChart('#signup-bar-by-month');
-  signupBar
-        .width(800)
-        .height(200)
-        .margins({top: 10, right: 50, bottom: 30, left: 50})
-        .dimension(byMonth)
-        .group(volumeByMonthGroup)
-        .x(d3.scaleTime().domain([min, max]))
-        .round(d3.timeMonth.round)
-        .xUnits(d3.timeMonths)
-        .colors("#00aa00");
 
 
-  // Signup by Year Barchart
   var byYear     = ndx.dimension(function(d) { return d3.timeYear(d.dd); });
   var volumeByMonthGroup  = byYear.group().reduceSum(function(d) { return d.count; });
-
   yearSignupBar = null;
   yearSignupBar 	= dc.barChart('#signup-bar-by-year');
+
+  // Signup by Year Barchart
   yearSignupBar
           .width(800)
           .height(200)
@@ -135,6 +111,61 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
           .round(d3.timeYear.round)
           .xUnits(d3.timeYears)
           .colors("#00aa00");
+
+  // Signup by Month Barchart
+  signupBar
+          .width(800)
+          .height(200)
+          .margins({top: 10, right: 50, bottom: 30, left: 50})
+          .dimension(byMonth)
+          .group(volumeByMonthGroup)
+          .x(d3.scaleTime().domain([min, max]))
+          .round(d3.timeMonth.round)
+          .xUnits(d3.timeMonths)
+          .colors("#00aa00")
+          .gap(1);
+
+  // Signup LineChart
+  monthLine
+        .width(800)
+        .height(200)
+        .margins({top: 10, right: 50, bottom: 30, left: 50})
+        .dimension(creationMonth)
+        .group(creationMonthGroup)
+        .x(x)
+        .y(y)
+        .round(d3.timeDay.round)
+        //.elasticY(true)
+        .xUnits(d3.timeDays)
+        .mouseZoomable(true)
+        .colors("#00aa00")
+        .rangeChart(cancelLine);
+
+  // Canceled LineChart
+  cancelLine
+        .width(800)
+        .height(200)
+        .margins({top: 10, right: 50, bottom: 30, left: 50})
+        .dimension(cancelMonth)
+        .group(cancelMonthGroup)
+        .x(x)
+        .round(d3.timeDay.round)
+        //.elasticY(true)
+        .y(y)
+        .xUnits(d3.timeDays)
+        .colors("#cc0000");
+
+
+
+
+
+
+
+
+
+  var seriesDimension = ndx.dimension(function(d) { return d.dd;});
+  var seriesGroup = seriesDimension.group().reduceSum(function(d){ return d.count; });
+
 
   dc.renderAll();
 
