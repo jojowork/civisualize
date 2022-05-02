@@ -37,7 +37,7 @@
 
 
 <script>
-var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS count, 0 as count_cancel,'signup' AS activity FROM civicrm_activity WHERE activity_type_id IN (56) group by DATE(activity_date_time) union SELECT DATE(activity_date_time) AS date, 0 as count, -count(*) AS count_cancel,'cancel' AS activity FROM civicrm_activity WHERE activity_type_id IN (60 ) group by DATE(activity_date_time)"};
+var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS count, 0 as count_cancel,'signup' AS activity FROM civicrm_activity WHERE activity_type_id IN (57) group by DATE(activity_date_time) union SELECT DATE(activity_date_time) AS date, 0 as count, -count(*) AS count_cancel,'cancel' AS activity FROM civicrm_activity WHERE activity_type_id IN (60 ) group by DATE(activity_date_time)"};
 //var data = {crmSQL file="activities"};
 {literal}
 (function() { function bootViz() {
