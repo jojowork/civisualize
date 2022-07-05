@@ -96,34 +96,51 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
 
 
   var byYear     = ndx.dimension(function(d) { return d3.timeYear(d.dd); });
-  var volumeByMonthGroup  = byYear.group().reduceSum(function(d) { return d.count; });
+  var volumeByYearGroup  = byYear.group().reduceSum(function(d) { return d.count; });
   yearSignupBar = null;
   yearSignupBar 	= dc.barChart('#signup-bar-by-year');
 
   // Signup by Year Barchart
   yearSignupBar
           .width(800)
-          .height(200)
-          .margins({top: 10, right: 50, bottom: 30, left: 50})
+          .height(150)
+          .margins({top: 0, right: 50, bottom: 30, left: 50})
           .dimension(byYear)
-          .group(volumeByMonthGroup)
+          .group(volumeByYearGroup)
           .x(d3.scaleTime().domain([min, max]))
+          //.x(d3.scaleOrdinal().domain([min, max]))
+          //.x(d3.scaleBand().domain([min,max]))
+          //.x(d3.scaleLinear().domain([min,max]))
+          //.brushOn(false)
           .round(d3.timeYear.round)
+          //.xUnits(dc.units.ordinal)
           .xUnits(d3.timeYears)
-          .colors("#00aa00");
+          .colors("#00aa00")
+          .yAxisLabel("Signups per Year")
+          .renderLabel(true)
+          .clipPadding(120)
+          ;
 
   // Signup by Month Barchart
   signupBar
           .width(800)
           .height(200)
-          .margins({top: 10, right: 50, bottom: 30, left: 50})
+          .margins({top: 30, right: 50, bottom: 30, left: 50})
           .dimension(byMonth)
           .group(volumeByMonthGroup)
-          .x(d3.scaleTime().domain([min, max]))
+          .x(x)
           .round(d3.timeMonth.round)
           .xUnits(d3.timeMonths)
+          //.xUnits(dc.units.ordinal)
           .colors("#00aa00")
-          .gap(1);
+          .gap(1)
+          .yAxisLabel("Signups per Month")
+          .renderLabel(true)
+          .centerBar(true)
+          .clipPadding(20)
+          //.brushOn(false)
+          .rangeChart(yearSignupBar)
+          ;
 
   // Signup LineChart
   monthLine
@@ -137,9 +154,11 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
         .round(d3.timeDay.round)
         //.elasticY(true)
         .xUnits(d3.timeDays)
-        .mouseZoomable(true)
+        //.mouseZoomable(true)
         .colors("#00aa00")
-        .rangeChart(cancelLine);
+        .rangeChart(signupBar)
+        .brushOn(false)
+        ;
 
   // Canceled LineChart
   cancelLine
@@ -149,11 +168,13 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
         .dimension(cancelMonth)
         .group(cancelMonthGroup)
         .x(x)
+        .y(y)
         .round(d3.timeDay.round)
         //.elasticY(true)
-        .y(y)
         .xUnits(d3.timeDays)
-        .colors("#cc0000");
+        .colors("#cc0000")
+        .rangeChart(signupBar)
+        .brushOn(false);
 
 
 
@@ -169,6 +190,7 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
 
   dc.renderAll();
 
+
   //CRM.civisualize.charts['exampleTypePie'] = typePie;
   //CRM.civisualize.charts['exampleGenderPie'] = genderPie;
   CRM.civisualize.charts['contactsMonthLine'] = monthLine;
@@ -182,6 +204,9 @@ var data = {crmSQL sql="SELECT DATE(activity_date_time) AS date, count(*) AS cou
   // Boot our script as soon as ready.
   CRM.civisualizeQueue = CRM.civisualizeQueue || [];
   CRM.civisualizeQueue.push(bootViz);
+
+
+
 })();
 </script>
 
